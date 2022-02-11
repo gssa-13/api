@@ -16,6 +16,22 @@ class ArticleController extends Controller
         return ArticleCollection::make(Article::all());
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $article = Article::create([
+            'title' => $request->input('data.attributes.title'),
+            'slug' => $request->input('data.attributes.slug'),
+            'content' => $request->input('data.attributes.content')
+        ]);
+        return ArticleResource::make($article);
+    }
+
     public function show(Article $article): ArticleResource
     {
         return ArticleResource::make($article);
