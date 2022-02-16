@@ -44,18 +44,18 @@ class Handler extends ExceptionHandler
     protected function invalidJson($request, ValidationException $exception)
     {
         $title = $exception->getMessage();
-
+        $errors = collect($exception->errors())
+            ->map(function ($message, $field) use ($title) {
+                return [
+                    'title' => $title,
+                    'detail' => $message[0],
+                    'source' => [
+                        'pointer' => "/".Str::replace('.', '/', $field)
+                    ]
+                ];
+            })->values();
         return response()->json([
-            'errors' => collect($exception->errors())
-                ->map(function ($message, $field) use ($title) {
-                    return [
-                        'title' => $title,
-                        'detail' => $message[0],
-                        'source' => [
-                            'pointer' => "/".Str::replace('.', '/', $field)
-                        ]
-                    ];
-                })->values()
+            'errors' => $errors
         ], 422);
 
     }
