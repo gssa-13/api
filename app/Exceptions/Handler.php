@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
+use App\Http\Responses\JsonApiValidationErrorResponse;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -41,24 +43,13 @@ class Handler extends ExceptionHandler
         });
     }
 
-    protected function invalidJson($request, ValidationException $exception)
+    /**
+     * @param $request
+     * @param ValidationException $exception
+     * @return JsonApiValidationErrorResponse
+     */
+    protected function invalidJson($request, ValidationException $exception): JsonApiValidationErrorResponse
     {
-        $title = $exception->getMessage();
-        $errors = collect($exception->errors())
-            ->map(function ($message, $field) use ($title) {
-                return [
-                    'title' => $title,
-                    'detail' => $message[0],
-                    'source' => [
-                        'pointer' => "/".Str::replace('.', '/', $field)
-                    ]
-                ];
-            })->values();
-        return response()->json([
-            'errors' => $errors
-        ], 422,[
-            'content-type' => 'application/vnd.api+json'
-        ]);
-
+        return new JsonApiValidationErrorResponse($exception);
     }
 }
