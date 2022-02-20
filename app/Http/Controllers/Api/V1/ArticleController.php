@@ -42,4 +42,27 @@ class ArticleController extends Controller
     {
         return ArticleResource::make($article);
     }
+
+    /**
+     * Update the specified resource in storage.
+     * @param Request $request
+     * @param Article $article
+     * @return ArticleResource
+     */
+    public function update(Request $request, Article $article): ArticleResource
+    {
+        $request->validate([
+            'data.attributes.title' => ['required', 'min:4'],
+            'data.attributes.slug' => ['required'],
+            'data.attributes.content' => ['required'],
+        ]);
+
+        $article->update([
+            'title' => $request->input('data.attributes.title'),
+            'slug' => $request->input('data.attributes.slug'),
+            'content' => $request->input('data.attributes.content')
+        ]);
+
+        return ArticleResource::make($article);
+    }
 }

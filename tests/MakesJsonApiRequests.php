@@ -41,8 +41,7 @@ trait MakesJsonApiRequests
 
         if ($this->formatJsonApiDocument)
         {
-            $formattedData['data']['attributes'] = $data;
-            $formattedData['data']['type'] = (string) Str::of($uri)->after('api/v1/');
+            $formattedData = $this->getFormattedData($uri, $data);
         }
 
         return parent::json($method, $uri, $formattedData ?? $data, $headers);
@@ -73,6 +72,8 @@ trait MakesJsonApiRequests
      */
     public function patchJson($uri, array $data = [], array $headers = []): TestResponse
     {
+        $headers['content-type'] = 'application/vnd.api+json';
+
         return $this->json('PATCH', $uri, $data, $headers);
     }
 
@@ -114,5 +115,20 @@ trait MakesJsonApiRequests
                 'content-type', 'application/vnd.api+json'
             )->assertStatus(422);
         };
+    }
+
+    public function getFormattedData($uri, $data)
+    {
+        $path = parse_url($uri)['path'];
+        $type = (string) Str::of($path)->after('api/v1/')->before('/');
+        $id = (string) Str::of($path)->after($type)->replace('/', '');
+
+        return [
+            'data' => array_filter([
+                'type' => $type,
+                'id' => $id,
+                'attributes' => $data
+            ])
+        ];
     }
 }
