@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Response;
+use Illuminate\Http\Request;
+
+use App\Http\Requests\V1\SaveArticleRequest;
+
 use App\Http\Resources\V1\ArticleCollection;
 use App\Http\Resources\V1\ArticleResource;
 use App\Models\Article;
-use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
@@ -22,19 +27,9 @@ class ArticleController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SaveArticleRequest $request)
     {
-        $request->validate([
-            'data.attributes.title' => ['required', 'min:4'],
-            'data.attributes.slug' => ['required'],
-            'data.attributes.content' => ['required'],
-        ]);
-
-        $article = Article::create([
-            'title' => $request->input('data.attributes.title'),
-            'slug' => $request->input('data.attributes.slug'),
-            'content' => $request->input('data.attributes.content')
-        ]);
+        $article = Article::create($request->validated());
         return ArticleResource::make($article);
     }
 
@@ -49,20 +44,20 @@ class ArticleController extends Controller
      * @param Article $article
      * @return ArticleResource
      */
-    public function update(Request $request, Article $article): ArticleResource
+    public function update(SaveArticleRequest $request, Article $article): ArticleResource
     {
-        $request->validate([
-            'data.attributes.title' => ['required', 'min:4'],
-            'data.attributes.slug' => ['required'],
-            'data.attributes.content' => ['required'],
-        ]);
-
-        $article->update([
-            'title' => $request->input('data.attributes.title'),
-            'slug' => $request->input('data.attributes.slug'),
-            'content' => $request->input('data.attributes.content')
-        ]);
+        $article->update($request->validated());
 
         return ArticleResource::make($article);
+    }
+
+    /**
+     * @param Article $article
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Article $article): Response
+    {
+        $article->delete();
+        return response()->noContent();
     }
 }
