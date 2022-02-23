@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 use App\Http\Requests\V1\SaveArticleRequest;
 
@@ -16,23 +17,48 @@ use App\Models\Article;
 class ArticleController extends Controller
 {
 
-    public function index(): ArticleCollection
+    public function index(Request  $request): ArticleCollection
     {
-        return ArticleCollection::make(Article::all());
+        $articles = Article::query();
+
+        if ( $request->filled('sort') )
+        {
+            $sortFields = explode(',' , $request->input('sort'));
+
+            $allowedSorts = array('title', 'content');
+
+            foreach ($sortFields as $sortField)
+            {
+                $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
+
+                $sortField = ltrim($sortField, '-');
+
+                abort_unless(in_array($sortField, $allowedSorts), 400);
+
+                $articles->orderBy($sortField, $sortDirection);
+            }
+        }
+
+        return ArticleCollection::make($articles->get());
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param SaveArticleRequest $request
+     * @return ArticleResource
      */
-    public function store(SaveArticleRequest $request)
+    public function store(SaveArticleRequest $request): ArticleResource
     {
         $article = Article::create($request->validated());
         return ArticleResource::make($article);
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param Article $article
+     * @return ArticleResource
+     */
     public function show(Article $article): ArticleResource
     {
         return ArticleResource::make($article);
@@ -40,7 +66,8 @@ class ArticleController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param Request $request
+     *
+     * @param SaveArticleRequest $request
      * @param Article $article
      * @return ArticleResource
      */
