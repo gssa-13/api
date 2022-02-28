@@ -49,4 +49,61 @@ class JsonApiTestResponse
             )->assertStatus(422);
         };
     }
+
+    public function assertJsonApiResource(): Closure
+    {
+        return function ($model, $attributes) {
+            /** @var TestResponse $this */
+
+            $this->assertJson([
+                'data' => [
+                    'type' => $model->getResourceType(),
+                    'id' => (string) $model->getRouteKey(),
+                    'attributes' => $attributes,
+                    'links' => [
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model )
+                    ]
+                ]
+            ])->assertHeader(
+                'Location',
+                route('api.v1.'.$model->getResourceType().'.show', $model )
+            );
+        };
+    }
+
+    public function assertJsonApiResourceCollection(): Closure
+    {
+        return function ($collection, $attributesKeys) {
+            /** @var TestResponse $this */
+
+            try {
+                $this->assertJsonStructure([
+                    'data' => [
+                        '*' => [
+                            'attributes' => $attributesKeys
+                        ]
+                    ]
+                ]);
+            } catch (ExpectationFailedException $e) {
+                PHPUnit::fail(
+                    "Failed to find a key inside the attributes key"
+                    .PHP_EOL.PHP_EOL.
+                    $e->getMessage()
+                );
+            }
+
+
+
+            foreach ($collection as $model)
+            {
+                $this->assertJsonFragment([
+                    'type' => 'articles',
+                    'id' => (string) $model->getRouteKey(),
+                    'links' => [
+                        'self' => route('api.v1.'.$model->getResourceType().'.show', $model )
+                    ]
+                ]);
+            }
+        };
+    }
 }

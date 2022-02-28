@@ -4,27 +4,26 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 use App\Http\Requests\V1\SaveArticleRequest;
 
-use App\Http\Resources\V1\ArticleCollection;
 use App\Http\Resources\V1\ArticleResource;
 use App\Models\Article;
 
 class ArticleController extends Controller
 {
 
-    public function index(): ArticleCollection
+    public function index(): JsonResource
     {
         $articles = Article::query()
             ->allowedFilters(array('title', 'content', 'month', 'year'))
             ->allowedSorts(array('title', 'content'))
+            ->sparseFieldset()
             ->jsonPaginate();
 
-        return ArticleCollection::make( $articles );
+        return ArticleResource::collection( $articles );
     }
 
     /**
@@ -44,8 +43,12 @@ class ArticleController extends Controller
      * @param Article $article
      * @return ArticleResource
      */
-    public function show(Article $article): ArticleResource
+    public function show($article): ArticleResource
     {
+        $article = Article::where('slug', $article)
+            ->sparseFieldset()
+            ->firstOrFail();
+
         return ArticleResource::make($article);
     }
 

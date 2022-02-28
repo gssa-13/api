@@ -48,6 +48,30 @@ class JsonApiQueryBuilder
         };
     }
 
+    public function sparseFieldset(): Closure
+    {
+        return function () {
+            /** @var Builder $this */
+            if ( request()->isNotFilled('fields') )
+            {
+                return $this;
+            }
+
+
+
+            $fields = explode(',', request('fields.'.$this->getResourceType()) );
+
+            $routeKeyName = $this->model->getRouteKeyName();
+
+            if ( ! in_array($routeKeyName, $fields ) )
+            {
+                $fields[] = $routeKeyName;
+            }
+
+            return $this->addSelect($fields);
+        };
+    }
+
     public function jsonPaginate(): Closure
     {
         return function () {
@@ -58,6 +82,20 @@ class JsonApiQueryBuilder
                 $pageName = 'page[number]',
                 $page = request('page.number', 1)
             )->appends( request()->only('sort','page.size', 'filter') );
+        };
+    }
+
+    public function getResourceType(): Closure
+    {
+        return function ()
+        {
+            /** @var Builder $this */
+            if ( property_exists( $this->model, 'resourceType' ) )
+            {
+                return $this->model->resourceType;
+            }
+
+            return $this->model->getTable();
         };
     }
 }
