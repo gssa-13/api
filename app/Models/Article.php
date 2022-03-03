@@ -54,4 +54,13 @@ class Article extends Model
     {
         return $query->whereMonth('created_at', $month);
     }
+
+    public function scopeCategories(Builder $query, $categories)
+    {
+        $categorySlugs = explode(',', $categories);
+
+        return $query->whereHas('category', function ($q) use($categorySlugs) {
+            $q->whereIn('slug', $categorySlugs);
+        });
+    }
 }

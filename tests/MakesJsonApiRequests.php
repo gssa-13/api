@@ -74,6 +74,8 @@ trait MakesJsonApiRequests
         $type = (string) Str::of($path)->after('api/v1/')->before('/');
         $id = (string) Str::of($path)->after($type)->replace('/', '');
 
-        return Document::type($type)->id($id)->attributes($data)->toArray();
+        return Document::type($type)->id($id)->attributes($data)
+                ->relationshipData($data['_relationships'] ?? [])
+                ->toArray();
     }
 }

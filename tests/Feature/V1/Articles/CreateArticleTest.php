@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\V1\Articles;
 
-use App\Models\Article;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
+
+use App\Models\Article;
+use App\Models\Category;
 
 class CreateArticleTest extends TestCase
 {
@@ -15,10 +15,15 @@ class CreateArticleTest extends TestCase
     /** @test */
     public function can_create_articles()
     {
+        $category = Category::factory()->create();
+
         $response = $this->postJson( route('api.v1.articles.store'), [
             'title' => 'New Article',
             'slug' => 'new-article',
-            'content' => 'Article content'
+            'content' => 'Article content',
+            '_relationships' => [
+                'category' => $category
+            ]
         ])->assertCreated();
 
         $article = Article::first();
@@ -28,19 +33,10 @@ class CreateArticleTest extends TestCase
             route('api.v1.articles.show' , $article)
         );
 
-        $response->assertExactJson([
-            'data' => [
-                'type' => 'articles',
-                'id' => (string) $article->getRouteKey(),
-                'attributes' => [
-                    'title' => 'New Article',
-                    'slug' => 'new-article',
-                    'content' => 'Article content'
-                ],
-                'links' => [
-                    'self' => route('api.v1.articles.show', $article)
-                ]
-            ]
+        $response->assertJsonApiResource($article, [
+            'title' => 'New Article',
+            'slug' => 'new-article',
+            'content' => 'Article content',
         ]);
     }
 
@@ -134,5 +130,28 @@ class CreateArticleTest extends TestCase
             'title' => 'New Article',
             'slug' => 'new-article'
         ])->assertJsonApiValidationErrors('content');
+    }
+
+    /** @test */
+    public function category_relationship_is_required()
+    {
+        $this->postJson( route('api.v1.articles.store'), [
+            'title' => 'New Article',
+            'slug' => 'new-article',
+            'content' => 'Article Content'
+        ])->assertJsonApiValidationErrors('relationships.category');
+    }
+
+    /** @test */
+    public function category_must_exist_in_database()
+    {
+        $this->postJson( route('api.v1.articles.store'), [
+            'title' => 'New Article',
+            'slug' => 'new-article',
+            'content' => 'Article Content',
+            '_relationships' => [
+                'category' => Category::factory()->make()
+            ]
+        ])->assertJsonApiValidationErrors('relationships.category');
     }
 }
