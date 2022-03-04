@@ -33,6 +33,5 @@ class ListCategoriesTest extends TestCase
         $response->assertJsonApiResourceCollection($categories, [
             'name'
         ]);
-
     }
 }
