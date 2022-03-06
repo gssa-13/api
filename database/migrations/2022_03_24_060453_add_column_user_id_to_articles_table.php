@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('articles', function (Blueprint $table) {
-            $table->foreignId('category_id')->after('id')
+            $table->foreignUuid('user_id')->after('category_id')
                 ->constrained()->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
@@ -27,8 +27,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('articles', function (Blueprint $table) {
-            $table->dropForeign('articles_category_id_foreign');
-            $table->dropColumn('category_id');
+            $table->dropForeign('articles_user_id_foreign');
+            $table->dropColumn('user_id');
         });
     }
 };
