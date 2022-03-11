@@ -4,7 +4,6 @@ namespace Tests\Feature\V1\Articles;
 
 use App\Models\Article;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class IncludeCategoryTest extends TestCase
