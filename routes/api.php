@@ -19,12 +19,20 @@ Route::get('articles/{article}/relationships/category', [
     ArticleCategoryController::class, 'index'
 ])->name('articles.relationships.category');
 
+Route::patch('articles/{article}/relationships/category', [
+    ArticleCategoryController::class, 'update'
+])->name('articles.relationships.category');
+
 Route::get('articles/{article}/category', [
     ArticleCategoryController::class, 'show'
 ])->name('articles.category');
 
 Route::get('articles/{article}/relationships/author', [
     ArticleAuthorController::class, 'index'
+])->name('articles.relationships.author');
+
+Route::patch('articles/{article}/relationships/author', [
+    ArticleAuthorController::class, 'update'
 ])->name('articles.relationships.author');
 
 Route::get('articles/{article}/author', [

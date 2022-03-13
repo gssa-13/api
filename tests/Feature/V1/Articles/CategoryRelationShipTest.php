@@ -3,6 +3,7 @@
 namespace Tests\Feature\V1\Articles;
 
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -45,6 +46,36 @@ class CategoryRelationShipTest extends TestCase
                     'name' => $article->category->name
                 ]
             ]
+        ]);
+    }
+
+    /** @test */
+    public function can_update_the_associate_category()
+    {
+        $article = Article::factory()->create();
+        $category = Category::factory()->create();
+
+        $url = route('api.v1.articles.relationships.category', $article);
+
+        $this->withoutJsonApiDocumentFormatting();
+
+        $response = $this->patchJson($url, [
+            'data' => [
+                'id' => $category->getRouteKey(),
+                'type' => 'categories',
+            ]
+        ]);
+
+        $response->assertExactJson([
+            'data' => [
+                'id' => $category->getRouteKey(),
+                'type' => 'categories',
+            ]
+        ]);
+
+        $this->assertDatabaseHas('articles', [
+            'title' => $article->title,
+            'category_id' => $category->id
         ]);
     }
 }
