@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -38,8 +38,17 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            $id = $request->input('data.id');
+            $type = $request->input('data.type');
+
+            return response()->json([
+                'errors' => [
+                    'title' => 'Not Found',
+                    'detail' => "No records found with the id '{$id}' in the '{$type}' resource.",
+                    'status' => '404'
+                ]
+            ], 404);
         });
     }
 
