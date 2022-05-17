@@ -38,6 +38,9 @@ class ArticleCategoryController extends Controller
      */
     public function update(Request $request, Article $article)
     {
+        $request->validate([
+            'data.id' => 'exists:categories,slug'
+        ]);
         $categorySlug = $request->input('data.id');
 
         $category = Category::where('slug', $categorySlug)->first();
