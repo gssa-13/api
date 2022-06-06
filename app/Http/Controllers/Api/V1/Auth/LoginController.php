@@ -24,10 +24,10 @@ class LoginController extends Controller
             'password' => ['required'],
             'device_name' => ['required'],
         ]);
+
         $user = User::whereEmail($request->email)->first();
 
-        if (! $user || Hash::check($request->email, $user->password))
-        {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => [__('auth.failed')]
             ]);

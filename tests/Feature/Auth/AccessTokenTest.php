@@ -41,12 +41,12 @@ class AccessTokenTest extends TestCase
 
         $data = $this->validCredentials([
             'email' => $user->email,
-            'password' => 'wrong password'
+            'password' => 'incorrect'
         ]);
 
-        $response = $this->postJson( route('api.v1.login'), $data);
+        $response = $this->postJson(route('api.v1.login'), $data);
 
-        $response->assertJsonValidationErrorFor('password');
+        $response->assertJsonValidationErrorFor('email');
     }
 
     /** @test */
