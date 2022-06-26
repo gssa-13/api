@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Http\Request;
 
 use App\Http\Requests\V1\SaveArticleRequest;
-
 use App\Http\Resources\V1\ArticleResource;
 use App\Models\Article;
 
@@ -70,6 +71,8 @@ class ArticleController extends Controller
      */
     public function update(SaveArticleRequest $request, Article $article): ArticleResource
     {
+        $this->authorize('update', $article);
+
         $article->update($request->validated());
 
         return ArticleResource::make($article);
@@ -77,10 +80,13 @@ class ArticleController extends Controller
 
     /**
      * @param Article $article
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Article $article): Response
+    public function destroy(Article $article, Request $request): Response
     {
+        $this->authorize('delete', $article);
+
         $article->delete();
         return response()->noContent();
     }
