@@ -20,7 +20,7 @@ class CreateArticleTest extends TestCase
         $author = User::factory()->create();
         $category = Category::factory()->create();
 
-        Sanctum::actingAs($author);
+        Sanctum::actingAs($author, ['article:create']);
 
         $response = $this->postJson( route('api.v1.articles.store'), [
             'title' => 'New Article',
