@@ -24,6 +24,16 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    public function givePermissionTo(Permission $permission)
+    {
+        $this->permissions()->syncWithoutDetaching($permission);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
