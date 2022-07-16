@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Http\Responses\TokenResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -33,14 +34,6 @@ class LoginController extends Controller
             ]);
         }
 
-        // generate token
-        $plainTextToken = $user->createToken(
-            $request->device_name,
-            [] // user permissions
-        )->plainTextToken;
-
-        return response()->json([
-            'plain-text-token' => $plainTextToken
-        ]);
+        return new TokenResponse($user);
     }
 }
